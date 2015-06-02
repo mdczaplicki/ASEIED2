@@ -2,7 +2,7 @@ import functools
 
 __author__ = 'Marek'
 import numpy as np
-from matplotlib.pyplot import plot, scatter, show
+from matplotlib.pyplot import plot, scatter, show, Circle, gcf, text
 import time
 
 
@@ -35,32 +35,59 @@ def bayes():
                                                for d in open('data1.csv').readlines()]]
     d2 = [(float(i[0]), float(i[1])) for i in [d.replace('\n', '').replace(',', '.').split('|')
                                                for d in open('data2.csv').readlines()]]
+    init_d1 = np.copy(d1)
+    init_d2 = np.copy(d2)
+
+    a_priori_d1 = len(d1)/(len(d1 + d2))
+    a_priori_d2 = len(d2)/(len(d1 + d2))
+
     n = int(input("How many new points?\n"))
-    xd = [v * max(i[0] for i in d1 + d2) + min(i[0] for i in d1 + d2) for v in np.random.random(n)]
-    xy = [v * max(i[1] for i in d1 + d2) + min(i[1] for i in d1 + d2) for v in np.random.random(n)]
-    points = zip(xd, xy)
+    xd = [v * max(i[0] for i in d1 + d2) + v + min(i[0] for i in d1 + d2) - 1 for v in np.random.random(n)]
+    xy = [v * max(i[1] for i in d1 + d2) + v + min(i[1] for i in d1 + d2) - 1 for v in np.random.random(n)]
+    points = list(zip(xd, xy))
 
     b_points1 = []
     b_points2 = []
 
-    r = 1
+    new_d1 = []
+    new_d2 = []
+
     for p, index in zip(points, range(len(points))):
         b_points1.append([])
         b_points2.append([])
-        for i in d1:
-            if np.sqrt(i[0]**2 + p[0]**2) < r:
-                b_points1[index].append(i)
-        for i in d2:
-            if np.sqrt(i[0]**2 + p[0]**2) < r:
-                b_points1[index].append(i)
+        r = 0.1
+        while len(b_points1[index] + b_points2[index]) < 3:
+            for i in d1:
+                if np.sqrt((i[0] - p[0])**2 + (i[1] - p[1])**2) < r and i not in b_points1[index]:
+                    b_points1[index].append(i)
+            for i in d2:
+                if np.sqrt((i[0] - p[0])**2 + (i[1] - p[1])**2) < r and i not in b_points2[index]:
+                    b_points2[index].append(i)
+            r += 0.05
+        fig = gcf()
+        fig.gca().add_artist(Circle(p, r, linestyle='dashed', fill=False, capstyle='round', clip_on=False))
 
+        if len(b_points1[index])/len(d1) * a_priori_d1 > len(b_points2[index])/len(d2) * a_priori_d2:
+            new_d1.append(p)
+            d1.append(p)
+        elif len(b_points1[index])/len(d1) * a_priori_d1 < len(b_points2[index])/len(d2) * a_priori_d2:
+            new_d2.append(p)
+            d2.append(p)
+        text(p[0] - 0.01, p[1] - 0.05, s=str(index))
 
-
-
-    scatter(*zip(*points), c='green', s=50)
-    scatter(*zip(*d1), c='red')
-    scatter(*zip(*d2), c='blue')
+    scatter(*zip(*points), c='black', s=200)
+    try:
+        scatter(*zip(*new_d1), c='pink', s=150)
+    except TypeError:
+        pass
+    try:
+        scatter(*zip(*new_d2), c='yellow', s=150)
+    except TypeError:
+        pass
+    scatter(*zip(*init_d1), c='pink', s=200)
+    scatter(*zip(*init_d2), c='yellow', s=200)
     show()
+
 
 def main():
     bayes()
