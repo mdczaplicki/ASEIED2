@@ -2,7 +2,7 @@ import functools
 
 __author__ = 'Marek'
 import numpy as np
-from matplotlib.pyplot import plot, scatter, show, Circle, gcf, text
+from matplotlib.pyplot import plot, scatter, show, Circle, gcf, text, arrow
 import time
 
 
@@ -60,20 +60,25 @@ def bayes():
             for i in d1:
                 if np.sqrt((i[0] - p[0])**2 + (i[1] - p[1])**2) < r and i not in b_points1[index]:
                     b_points1[index].append(i)
+                    arrow(i[0], i[1], (p[0] - i[0]) * 0.5, (p[1] - i[1]) * 0.5)
+                    plot(*zip(*[p, i]), ls='--')
+
             for i in d2:
                 if np.sqrt((i[0] - p[0])**2 + (i[1] - p[1])**2) < r and i not in b_points2[index]:
                     b_points2[index].append(i)
-            r += 0.05
+                    arrow(i[0], i[1], (p[0] - i[0]) * 0.5, (p[1] - i[1]) * 0.5)
+                    plot(*zip(*[p, i]), ls='--')
+            r += 0.01
         fig = gcf()
-        fig.gca().add_artist(Circle(p, r, linestyle='dashed', fill=False, capstyle='round', clip_on=False))
+        fig.gca().add_artist(Circle(p, r, linestyle='dotted', fill=False, capstyle='round', clip_on=False))
 
         if len(b_points1[index])/len(d1) * a_priori_d1 > len(b_points2[index])/len(d2) * a_priori_d2:
             new_d1.append(p)
-            d1.append(p)
+            d1.append(p)  # should Bayes consider new added points?
         elif len(b_points1[index])/len(d1) * a_priori_d1 < len(b_points2[index])/len(d2) * a_priori_d2:
             new_d2.append(p)
-            d2.append(p)
-        text(p[0] - 0.01, p[1] - 0.05, s=str(index))
+            d2.append(p)  # should Bayes consider new added points?
+        text(p[0] + 0.05, p[1] + 0.1, s=str(index))
 
     scatter(*zip(*points), c='black', s=200)
     try:
@@ -90,40 +95,42 @@ def bayes():
 
 
 def main():
-    bayes()
-    # while True:
-    #     init = list(np.random.random_integers(0, 1000, 1000))
-    #     try:
-    #         print("======================================")
-    #         print(init)
-    #         n = int(input("======================================\n"
-    #                       "Choose sorting method:\n"
-    #                       "0. Exit\n"
-    #                       "1. Bubble-sort\n"
-    #                       "2. Selection-sort\n"
-    #                       "3. Quick-sort\n"))
-    #     except ValueError:
-    #         continue
-    #     if n == 1:
-    #         start = time.time()
-    #         print(bubble(list(np.copy(init))))
-    #         end = time.time()
-    #         print("Time of sorting:")
-    #         print(end - start)
-    #     elif n == 2:
-    #         start = time.time()
-    #         print(selection(list(np.copy(init))))
-    #         end = time.time()
-    #         print("Time of sorting:")
-    #         print(end - start)
-    #     elif n == 3:
-    #         start = time.time()
-    #         print(quick(init))
-    #         end = time.time()
-    #         print("Time of sorting:")
-    #         print(end - start)
-    #     elif n == 0:
-    #         break
+    while True:
+        init = list(np.random.random_integers(0, 1000, 1000))
+        try:
+            print("======================================")
+            print(init)
+            n = int(input("======================================\n"
+                          "Choose sorting method:\n"
+                          "0. Exit\n"
+                          "1. Bubble-sort\n"
+                          "2. Selection-sort\n"
+                          "3. Quick-sort\n"
+                          "4. Naive Bayes Classifier\n"))
+        except ValueError:
+            continue
+        if n == 1:
+            start = time.time()
+            print(bubble(list(np.copy(init))))
+            end = time.time()
+            print("Time of sorting:")
+            print(end - start)
+        elif n == 2:
+            start = time.time()
+            print(selection(list(np.copy(init))))
+            end = time.time()
+            print("Time of sorting:")
+            print(end - start)
+        elif n == 3:
+            start = time.time()
+            print(quick(init))
+            end = time.time()
+            print("Time of sorting:")
+            print(end - start)
+        elif n == 4:
+            bayes()
+        elif n == 0:
+            break
 
 if __name__ == "__main__":
     import sys
