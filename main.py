@@ -1,8 +1,6 @@
-import functools
-
 __author__ = 'Marek'
 import numpy as np
-from matplotlib.pyplot import plot, scatter, show, Circle, gcf, text, arrow
+from matplotlib.pyplot import plot, scatter, show, Circle, gcf, text, arrow, figure
 import time
 
 
@@ -41,16 +39,23 @@ def bayes():
     a_priori_d1 = len(d1)/(len(d1 + d2))
     a_priori_d2 = len(d2)/(len(d1 + d2))
 
-    n = int(input("How many new points?\n"))
+    try:
+        n = int(input("How many new points?\n"))
+    except ValueError:
+        print("N taken as 5")
+        n = 5
     xd = [v * max(i[0] for i in d1 + d2) + v + min(i[0] for i in d1 + d2) - 1 for v in np.random.random(n)]
-    xy = [v * max(i[1] for i in d1 + d2) + v + min(i[1] for i in d1 + d2) - 1 for v in np.random.random(n)]
-    points = list(zip(xd, xy))
+    yd = [v * max(i[1] for i in d1 + d2) + v + min(i[1] for i in d1 + d2) - 1 for v in np.random.random(n)]
+    points = list(zip(xd, yd))
 
     b_points1 = []
     b_points2 = []
 
     new_d1 = []
     new_d2 = []
+
+    def on_pick(event):
+        print("Point number: ", event.ind)
 
     for p, index in zip(points, range(len(points))):
         b_points1.append([])
@@ -78,9 +83,10 @@ def bayes():
         elif len(b_points1[index])/len(d1) * a_priori_d1 < len(b_points2[index])/len(d2) * a_priori_d2:
             new_d2.append(p)
             d2.append(p)  # should Bayes consider new added points?
-        text(p[0] + 0.05, p[1] + 0.1, s=str(index))
+        #text(p[0] + 0.05, p[1] + 0.1, s=str(index))
 
-    scatter(*zip(*points), c='black', s=200)
+    scatter(*zip(*points), c='black', s=200, picker=True)
+    fig.canvas.mpl_connect('pick_event', on_pick)
     try:
         scatter(*zip(*new_d1), c='pink', s=150)
     except TypeError:
