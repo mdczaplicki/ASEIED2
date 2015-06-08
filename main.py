@@ -54,9 +54,6 @@ def bayes():
     new_d1 = []
     new_d2 = []
 
-    def on_pick(event):
-        print("Point number: ", event.ind)
-
     for p, index in zip(points, range(len(points))):
         b_points1.append([])
         b_points2.append([])
@@ -84,6 +81,10 @@ def bayes():
             new_d2.append(p)
             d2.append(p)  # should Bayes consider new added points?
         #text(p[0] + 0.05, p[1] + 0.1, s=str(index))
+
+    def on_pick(event):
+        t = event.ind[0]
+        print("Point number: ", event.ind, points[t])
 
     scatter(*zip(*points), c='black', s=200, picker=True)
     fig.canvas.mpl_connect('pick_event', on_pick)
